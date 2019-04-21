@@ -1,9 +1,6 @@
 
 # core libraries
-import argparse
 import os
-import subprocess
-import sys
 import time
 
 # third party libraries
@@ -12,7 +9,7 @@ from selenium.webdriver.firefox.options import Options
 from bs4 import BeautifulSoup
 
 # our imports
-import speech
+import announce
 
 
 trainingURL = "https://trainbeacon.ses.nsw.gov.au"
@@ -26,40 +23,15 @@ jobs_recent_enough = 30
 jobs_refresh_delay = 10
 
 
-
-def announceJob(job):
-    print(job)
-    # Generate sentence to speak
-    words = []
-    words.append('There is an incident requiring ')
-    words.append(job['priority'])
-    words.append(' response! ')
-
-    words.append(' It is a ')
-    words.append(job['type'])
-    words.append(' !')
-
-    words.append(' Location is ')
-    words.append(job['address'])
-    words.append(' !')
-
-
-    # Say it!
-    announcement = ' '.join(words)
-    print(announcement)
-    # Repeat announcement twice so they can be heard a bit clearly
-    speech.sayText(announcement)
-    speech.sayText("I repeat,")
-    speech.sayText(announcement)
-    #speech.sayText('S E S, Rollout!')
-
 def parse_jobs_table(browser):
     '''Parse the job register table and return a dict of jobs, with jobid as id'''
     # Refresh page required to ensure table is up to date
     browser.refresh()
+    time.sleep(3) #FIXME: wait until things load. Should look into restructuing program flow for efficiency.
     JobRegisterTable = browser.find_element_by_id("jobRegisterTable")
     # TODO
     # handle exception if table isnt loaded yet
+    time.sleep(3) #FIXME: wait until things load. Should look into restructuing program flow for efficiency.
 
     jobTable = BeautifulSoup(browser.page_source, "html.parser")
     jobRows = jobTable.find("table", id="jobRegisterTable").find("tbody").find_all("tr")
@@ -150,4 +122,5 @@ def monitor_jobs(isLiveSite=False, isHeadless=False):
 
         # Announce all new jobs
         for job in new_job_ids:
-            announceJob(known_jobs[job])
+            announce.announceJob(known_jobs[job])
+

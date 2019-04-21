@@ -12,3 +12,6 @@ def list_ports():
         print(f"{port}: {desc} [{hwid}]") 
 
     return(ports)
+
+def announce(job):
+    pass

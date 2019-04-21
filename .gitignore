@@ -1,6 +1,8 @@
 
 # Text editor swapfiles
 *.swp
+*.swo
+*.swn
 *~
 
 # Python artifacts
