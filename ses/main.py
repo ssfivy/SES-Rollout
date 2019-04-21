@@ -7,20 +7,22 @@ __author__ = "mgf897, ssfivy"
 __version__ = "0.1.0"
 __license__ = "CC SA"
 
+# core libraries
 import argparse
+import glob
+import os
 import subprocess
 import sys
-import os
-import sys
 import time
-import glob
-import serial.tools.list_ports
+
+# third party libraries
 from selenium.webdriver import Firefox
 from selenium.webdriver.firefox.options import Options
 from bs4 import BeautifulSoup
 
-if sys.platform.startswith('win32'):
-    import win32com.client
+# our imports
+import serialout
+import speech
 
 trainingURL = "https://trainbeacon.ses.nsw.gov.au"
 trainingURL_login = "https://identitytrain.ses.nsw.gov.au/core/login"
@@ -35,25 +37,6 @@ jobs_refresh_delay = 10
 # version number check: Require 3.6
 if sys.version_info < (3, 6) :
     raise NotImplementedError('This script requires Python version 3.6 or later')
-
-def list_ports():
-    ports = serial.tools.list_ports.comports()
-	
-    print("Available comm ports")
-    for port, desc, hwid in sorted(ports):
-        print(f"{port}: {desc} [{hwid}]") 
-
-    return(ports)
-    
-def sayText(sentence):
-    if sys.platform.startswith('linux'):
-        # Festival tts engine is written partly with Scheme so its syntax is a bit exotic
-        cmd = ['festival', '-b', '(voice_cmu_us_slt_arctic_hts)',  f'(SayText "{sentence}")']
-        subprocess.run(cmd)
-    elif sys.platform.startswith('win32'):
-        # Completely untested, might neex extra dependencies. Please update READMe when you got this working.
-        speaker = win32com.client.Dispatch("SAPI.SpVoice")
-        speaker.Speak(sentence)
 
 
 def announceJob(job):
@@ -77,10 +60,10 @@ def announceJob(job):
     announcement = ' '.join(words)
     print(announcement)
     # Repeat announcement twice so they can be heard a bit clearly
-    sayText(announcement)
-    sayText("I repeat,")
-    sayText(announcement)
-    #sayText('S E S, Rollout!')
+    speech.sayText(announcement)
+    speech.sayText("I repeat,")
+    speech.sayText(announcement)
+    #speech.sayText('S E S, Rollout!')
 
 def monitor_jobs_api(isLiveSite=False):
     '''Connect to API and monitor for new jobs'''
@@ -140,7 +123,7 @@ def monitor_jobs_selenium(isLiveSite=False, isHeadless=False):
 
     browser = Firefox(options=opts)
     browser.get(baseurl + "/Jobs")
-    
+
     if (browser.current_url.split("?")[0] == loginurl):
         # Login
         user_form = browser.find_element_by_id('username')
@@ -149,14 +132,14 @@ def monitor_jobs_selenium(isLiveSite=False, isHeadless=False):
         pass_form.send_keys(ses_pass)
         pass_form.submit()
 
-        
+
     # Check if login was successful
     # Are we still on the login screen?
     print(f"waiting {jobs_refresh_delay} seconds before checking login state")
     time.sleep(jobs_refresh_delay)
     if (browser.current_url.split("?")[0] == loginurl): 
          raise RuntimeError("Login error. Check username/password")
-        
+
     # Try to get the initial list of jobs. We don't announce these.
     print(f"waiting for {initial_wait} seconds to allow website to load")
     time.sleep(initial_wait)
@@ -196,7 +179,7 @@ def parseinput():
     target_livesite = parser.add_mutually_exclusive_group(required=True)
     target_livesite.add_argument('--live', action='store_true', help='Parse the live SES site')
     target_livesite.add_argument('--training', action='store_true', help='Parse the training SES site')
-    
+
     # Use headless browser
     parser.add_argument('--headless', action='store_true', default=False, help='Use headless browser instead of popping a Firefox window')
 
@@ -213,11 +196,11 @@ if __name__ == "__main__":
 
     # allows the operator to verify the speaker is working
     print('Saying speaker test...')
-    #sayText('This is the S E S Rollout speaker test message!')
+    #speech.sayText('This is the S E S Rollout speaker test message!')
 
     # List available serial ports
-    list_ports()
-    
+    serialout.list_ports()
+
     #monitor_jobs_api(livesite)
     monitor_jobs_selenium(livesite, args.headless)
 
