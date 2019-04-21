@@ -11,3 +11,8 @@
 
 # Geckodriver log
 geckodriver.log
+
+# pyinstaller artifacts
+build/*
+dist/*
+*.spec

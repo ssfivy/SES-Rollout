@@ -1,6 +1,18 @@
+
+# Parsing web pages
 beautifulsoup4==4.6.3
-pypiwin32==223
-pyserial==3.4
-pywin32==224
 selenium==3.141.0
 urllib3==1.24.1
+
+# Serial output support
+pyserial==3.4
+
+# Windows-only  APIs (will not work on Linux)
+pypiwin32==223 ; sys_platform == 'win32'
+pywin32==224 ; sys_platform == 'win32'
+
+# GUI toolkit
+PySide2==5.12.2
+
+# Packaging tools
+pyinstaller==3.4
