@@ -1,6 +1,5 @@
 
 # core libraries
-import os
 import time
 
 # third party libraries
@@ -54,15 +53,12 @@ def parse_jobs_table(browser):
 
     return jobs
 
-def monitor_jobs(isLiveSite=False, isHeadless=False):
+def monitor_jobs(credentials, isLiveSite=False, isHeadless=False):
     '''Connect to web interface and parse jobs manually using Selenium'''
 
-    # get credentials from system variables
-    ses_login = os.environ.get("SES_LOGIN") or ''
-    ses_pass = os.environ.get("SES_PASS") or ''
 
-    if len(ses_login) < 1 or len(ses_pass) < 1:
-        raise RuntimeError("No login credentials set. Set SES_LOGIN and SES_PASS environment variables")
+    if len(credentials['login']) < 1 or len(credentials['pass']) < 1:
+        raise RuntimeError("No login credentials set.")
 
     if isLiveSite:
         #baseurl = liveURL
@@ -83,9 +79,9 @@ def monitor_jobs(isLiveSite=False, isHeadless=False):
     if (browser.current_url.split("?")[0] == loginurl):
         # Login
         user_form = browser.find_element_by_id('username')
-        user_form.send_keys(ses_login)
+        user_form.send_keys(credentials['login'])
         pass_form = browser.find_element_by_id('password')
-        pass_form.send_keys(ses_pass)
+        pass_form.send_keys(credentials['pass'])
         pass_form.submit()
 
 

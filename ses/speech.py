@@ -45,3 +45,16 @@ def announce(job):
     sayText("I repeat,")
     sayText(announcement)
     #sayText('S E S, Rollout!')
+
+def announceStartup(isLive):
+    if isLive:
+        announcement = 'This is the LIVE speaker test message! I repeat, LIVE test message!'
+    else:
+        announcement = 'This is the Training speaker test message! I repeat, Training test message!'
+
+    print('Saying speaker test:')
+    print(announcement)
+    sayText(announcement)
+
+
+

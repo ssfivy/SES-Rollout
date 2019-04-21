@@ -9,13 +9,14 @@ __license__ = "CC SA"
 
 # core libraries
 import argparse
+import os
 import sys
 
 # our imports
+import announce
 import monitor_ses_api
 import monitor_ses_selenium
 import serialout
-import speech
 
 # version number check: Require 3.6
 if sys.version_info < (3, 6) :
@@ -48,13 +49,20 @@ if __name__ == "__main__":
         livesite = False
 
     # allows the operator to verify the speaker is working
-    print('Saying speaker test...')
-    #speech.sayText('This is the S E S Rollout speaker test message!')
+    announce.announceStartup(livesite)
 
     # List available serial ports
     serialout.list_ports()
 
+    # get credentials from system variables
+    credentials = {}
+    credentials['login'] = os.environ.get("SES_LOGIN") or ''
+    credentials['pass'] = os.environ.get("SES_PASS") or ''
+
+    if len(credentials['login']) < 1 or len(credentials['pass']) < 1:
+        raise RuntimeError("No login credentials set. Set SES_LOGIN and SES_PASS environment variables")
+
     #monitor_ses_api.monitor_jobs(livesite)
-    monitor_ses_selenium.monitor_jobs(livesite, args.headless)
+    monitor_ses_selenium.monitor_jobs(credentials, livesite, args.headless)
 
 
