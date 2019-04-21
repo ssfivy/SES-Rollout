@@ -16,3 +16,5 @@ All other dependencies are in `requirements.txt` , install with:
 
 TODO: Clarify which requirements are buildtime vs runtime
 
+## License
+GNU GPL v3

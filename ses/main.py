@@ -5,7 +5,7 @@ SES Rollout
 
 __author__ = "mgf897, ssfivy"
 __version__ = "0.1.0"
-__license__ = "CC SA"
+__license__ = "GPL-3.0-or-later"
 
 # core libraries
 import argparse
