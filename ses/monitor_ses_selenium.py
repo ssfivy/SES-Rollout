@@ -1,5 +1,6 @@
 
 # core libraries
+import logging
 import time
 
 # third party libraries
@@ -87,13 +88,13 @@ def monitor_jobs(credentials, isLiveSite=False, isHeadless=False):
 
     # Check if login was successful
     # Are we still on the login screen?
-    print(f"waiting {jobs_refresh_delay} seconds before checking login state")
+    logging.info(f"waiting {jobs_refresh_delay} seconds before checking login state")
     time.sleep(jobs_refresh_delay)
     if (browser.current_url.split("?")[0] == loginurl): 
          raise RuntimeError("Login error. Check username/password")
 
     # Try to get the initial list of jobs. We don't announce these.
-    print(f"waiting for {initial_wait} seconds to allow website to load")
+    logging.info(f"waiting for {initial_wait} seconds to allow website to load")
     time.sleep(initial_wait)
 
     known_jobs = {}
@@ -103,7 +104,7 @@ def monitor_jobs(credentials, isLiveSite=False, isHeadless=False):
 
     # Check for further additional jobs
     while True:
-        print(f"waiting {jobs_refresh_delay} seconds")
+        logging.info(f"waiting {jobs_refresh_delay} seconds")
         time.sleep(jobs_refresh_delay)
 
         # Hopefully the web page does not keep appending the jobs in the web page

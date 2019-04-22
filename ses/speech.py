@@ -4,6 +4,7 @@
 
 
 # core python imports
+import logging
 import subprocess
 import sys
 
@@ -12,6 +13,7 @@ if sys.platform.startswith('win32'):
     import win32com.client
 
 def sayText(sentence):
+    logging.debug('Speaking text: "'+sentence+'"')
     if sys.platform.startswith('linux'):
         # Festival tts engine is written partly with Scheme so its syntax is a bit exotic
         cmd = ['festival', '-b', '(voice_cmu_us_slt_arctic_hts)',  f'(SayText "{sentence}")']
@@ -39,7 +41,6 @@ def announce(job):
 
     # Say it!
     announcement = ' '.join(words)
-    print(announcement)
     # Repeat announcement twice so they can be heard a bit clearly
     sayText(announcement)
     sayText("I repeat,")
@@ -52,8 +53,6 @@ def announceStartup(isLive):
     else:
         announcement = 'This is the Training speaker test message! I repeat, Training test message!'
 
-    print('Saying speaker test:')
-    print(announcement)
     sayText(announcement)
 
 

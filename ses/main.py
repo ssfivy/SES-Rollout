@@ -9,6 +9,7 @@ __license__ = "GPL-3.0-or-later"
 
 # core libraries
 import argparse
+import logging
 import os
 import sys
 
@@ -42,6 +43,19 @@ def parseinput():
 
 if __name__ == "__main__":
     """ This is executed when run from the command line """
+
+    # set up logging
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s : %(message)s')
+
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.INFO)
+    ch.setFormatter(formatter)
+    logger.addHandler(ch)
+
+    logger.info('Logging initialised!')
+
     args = parseinput()
     if args.live:
         livesite = True

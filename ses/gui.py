@@ -6,6 +6,7 @@
 # https://stackoverflow.com/questions/14892713/how-do-you-load-ui-files-onto-python-classes-with-pyside/14894550#14894550
 # https://stackoverflow.com/questions/37888581/pyinstaller-ui-files-filenotfounderror-errno-2-no-such-file-or-directory
 
+import logging
 import os
 import sys
 import threading
@@ -66,7 +67,7 @@ class SESRMainWindow(QtWidgets.QMainWindow):
 
 
     def monitor_start(self):
-        print('Starting_program!')
+        logging.info('Starting monitor!')
 
         # Grab all information needed to start
         credentials = {}
@@ -74,7 +75,7 @@ class SESRMainWindow(QtWidgets.QMainWindow):
         credentials['pass']  = self.ui.password.text() or ''
 
         if len(credentials['login']) < 1 or len(credentials['pass']) < 1:
-            print("No login credentials set.")
+            logging.error("No login credentials set.")
             return
 
         headless = self.ui.browser_headless.isChecked()
@@ -93,13 +94,13 @@ class SESRMainWindow(QtWidgets.QMainWindow):
         # Start monitoring
         # Use separate thread so it does not block the main UI thread
         def monitor_worker():
-            announce.announceStartup(livesite)
+            # no need to announce startup since we already have working speaker test?
             monitor_ses_selenium.monitor_jobs(credentials, livesite, headless)
         self.monitor_thread = multiprocessing.Process(target=monitor_worker)
         self.monitor_thread.start()
 
     def monitor_stop(self):
-        print('Stopping monitor!')
+        logging.info('Stopping monitor!')
         # Change user interface
         self.ui.username.setDisabled(False)
         self.ui.password.setDisabled(False)
@@ -111,13 +112,26 @@ class SESRMainWindow(QtWidgets.QMainWindow):
     def speaker_say(self):
         # Use separate thread so it does not block the main UI thread
         def speaker_worker():
-            speech.sayText(self.ui.speaker_test_string.text())
+            sentence = self.ui.speaker_test_string.text()
+            speech.sayText(sentence)
         t = threading.Thread(target=speaker_worker)
         t.start()
 
 if __name__ == "__main__":
-    app = QtWidgets.QApplication(sys.argv)
+    # set up logging
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s : %(message)s')
 
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.INFO)
+    ch.setFormatter(formatter)
+    logger.addHandler(ch)
+
+    logger.info('Logging initialised!')
+
+    # set up application
+    app = QtWidgets.QApplication(sys.argv)
     window = SESRMainWindow()
 
     sys.exit(app.exec_())

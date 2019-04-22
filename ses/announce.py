@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 
 # Announce jobs top-level API
+import logging
 
 import serialout
 import speech
 
 def announceJob(job):
     '''Announce the details of a specific job'''
-    print(job)
+    logging.debug(job)
     speech.announce(job)
     serialout.announce(job)
     #ethernet.announce(job)
@@ -15,7 +16,7 @@ def announceJob(job):
 
 def announceStartup(isLive):
     '''Announce application startup, including warning if this is simply a training '''
-    print('Announcing application startup')
+    logging.info('Announcing application startup')
     speech.announceStartup(isLive)
     #serialout.announceStartup(isLive)
     #ethernet.announceStartup(isLive)
