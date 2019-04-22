@@ -8,7 +8,7 @@ import speech
 
 def announceJob(job):
     '''Announce the details of a specific job'''
-    logging.debug(job)
+    logging.info(job)
     speech.announce(job)
     serialout.announce(job)
     #ethernet.announce(job)

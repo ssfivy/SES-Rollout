@@ -12,7 +12,6 @@ from   logging.handlers import RotatingFileHandler
 import os
 import sys
 import threading
-import multiprocessing
 
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
@@ -29,6 +28,9 @@ class StoppableThread(threading.Thread):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._stop_event = threading.Event()
+
+    def wait(self, timeout):
+        self._stop_event.wait(timeout)
 
     def stop(self):
         self._stop_event.set()
@@ -82,6 +84,9 @@ class SESRMainWindow(QtWidgets.QMainWindow):
         self.monitor_thread = None
         self.ui.monitor_start.clicked.connect(self.monitor_start)
         self.ui.monitor_stop.clicked.connect(self.monitor_stop)
+        # Prefill user/pass from environment variable - useful during development
+        self.ui.username.setText(os.environ.get("SES_LOGIN") or '')
+        self.ui.password.setText(os.environ.get("SES_PASS") or '')
 
         # Set up behavior - Speaker tab
         self.ui.speaker_test_say.clicked.connect(self.speaker_say)
@@ -111,6 +116,7 @@ class SESRMainWindow(QtWidgets.QMainWindow):
             return
 
         headless = self.ui.browser_headless.isChecked()
+        announceInitial = self.ui.jobs_announceInitial.isChecked()
 
         if self.ui.rb_site_live.isChecked():
             livesite = True
@@ -125,13 +131,21 @@ class SESRMainWindow(QtWidgets.QMainWindow):
         self.ui.rb_site_live.setDisabled(True)
         self.ui.rb_site_training.setDisabled(True)
         self.ui.browser_headless.setDisabled(True)
+        self.ui.jobs_announceInitial.setDisabled(True)
 
         # Start monitoring
         # Use separate thread so it does not block the main UI thread
         def monitor_worker():
             # no need to announce startup since we already have working speaker test?
-            monitor_ses_selenium.monitor_jobs(credentials, livesite, headless)
-        self.monitor_thread = multiprocessing.Process(target=monitor_worker)
+            try:
+                monitor_ses_selenium.monitor_jobs(credentials, livesite, headless, announceInitial,
+                    wait_f=threading.current_thread().wait,
+                    runloop_f=threading.current_thread().stopped)
+            except:
+                logger.exception('Exception in monitor_worker thread')
+            finally:
+                self.monitor_stop()
+        self.monitor_thread = StoppableThread(target=monitor_worker, daemon=True)
         self.monitor_thread.start()
 
     def monitor_stop(self):
@@ -144,8 +158,9 @@ class SESRMainWindow(QtWidgets.QMainWindow):
         self.ui.rb_site_live.setDisabled(False)
         self.ui.rb_site_training.setDisabled(False)
         self.ui.browser_headless.setDisabled(False)
+        self.ui.jobs_announceInitial.setDisabled(False)
         # Set stop flag
-        self.monitor_thread.terminate()
+        self.monitor_thread.stop()
 
     def speaker_say(self):
         # Use separate thread so it does not block the main UI thread
@@ -191,6 +206,6 @@ if __name__ == "__main__":
     try:
         ret = app.exec_()
     except:
-        logging.exception()
+        logging.exception('exception in application')
     finally:
         sys.exit(ret)

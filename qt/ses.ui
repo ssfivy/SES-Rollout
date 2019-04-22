@@ -73,10 +73,17 @@
            <string>Runtime Configuration</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_2">
-           <item row="0" column="0">
+           <item row="1" column="0">
             <widget class="QCheckBox" name="browser_headless">
              <property name="text">
               <string>Headless browser</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QCheckBox" name="jobs_announceInitial">
+             <property name="text">
+              <string>Announce Initial Jobs</string>
              </property>
             </widget>
            </item>

@@ -23,15 +23,15 @@ jobs_recent_enough = 30
 jobs_refresh_delay = 10
 
 
-def parse_jobs_table(browser):
+def parse_jobs_table(browser, wait_f=time.sleep):
     '''Parse the job register table and return a dict of jobs, with jobid as id'''
     # Refresh page required to ensure table is up to date
     browser.refresh()
-    time.sleep(3) #FIXME: wait until things load. Should look into restructuing program flow for efficiency.
+    wait_f(3) #FIXME: wait until things load. Should look into how to make this more efficient?
     JobRegisterTable = browser.find_element_by_id("jobRegisterTable")
     # TODO
     # handle exception if table isnt loaded yet
-    time.sleep(3) #FIXME: wait until things load. Should look into restructuing program flow for efficiency.
+    wait_f(3) #FIXME: wait until things load. Should look into how to make this more efficient?
 
     jobTable = BeautifulSoup(browser.page_source, "html.parser")
     jobRows = jobTable.find("table", id="jobRegisterTable").find("tbody").find_all("tr")
@@ -54,8 +54,11 @@ def parse_jobs_table(browser):
 
     return jobs
 
-def monitor_jobs(credentials, isLiveSite=False, isHeadless=False):
+def monitor_jobs(credentials, isLiveSite=False, isHeadless=False, announceInitialJobs=False, wait_f=time.sleep, runloop_f=None):
     '''Connect to web interface and parse jobs manually using Selenium'''
+    # wait_f = function to call to wait x number of seconds, defaults to time.sleep. Need to replace this when we run as multithreaded so we can be killed quickly
+    # runloop_f = function that returns false when we want to end the thread.
+    # Why this weird scheme, since I don't want to change program flow too much and keep single-threaded CLI compatibility (for now)
 
 
     if len(credentials['login']) < 1 or len(credentials['pass']) < 1:
@@ -89,27 +92,32 @@ def monitor_jobs(credentials, isLiveSite=False, isHeadless=False):
     # Check if login was successful
     # Are we still on the login screen?
     logging.info(f"waiting {jobs_refresh_delay} seconds before checking login state")
-    time.sleep(jobs_refresh_delay)
+    wait_f(jobs_refresh_delay)
     if (browser.current_url.split("?")[0] == loginurl): 
-         raise RuntimeError("Login error. Check username/password")
+        browser.quit()
+        raise RuntimeError("Login error. Check username/password")
 
     # Try to get the initial list of jobs. We don't announce these.
     logging.info(f"waiting for {initial_wait} seconds to allow website to load")
-    time.sleep(initial_wait)
+    wait_f(initial_wait)
 
     known_jobs = {}
     # Comment out the parse function below to make us announce all initial jobs (for testing)
     # Else, this will get an initial list of jobs which will not be announced
-    known_jobs = parse_jobs_table(browser)
+    if not announceInitialJobs:
+        known_jobs = parse_jobs_table(browser, wait_f)
 
     # Check for further additional jobs
     while True:
+        if runloop_f is not None and runloop_f():
+            break
+
         logging.info(f"waiting {jobs_refresh_delay} seconds")
-        time.sleep(jobs_refresh_delay)
+        wait_f(jobs_refresh_delay)
 
         # Hopefully the web page does not keep appending the jobs in the web page
         # so updated_job will not grow indefinitely
-        updated_jobs = parse_jobs_table(browser)
+        updated_jobs = parse_jobs_table(browser, wait_f)
 
         # Get new jobs by finding the diff between two sets, see https://stackoverflow.com/a/30986796
         new_job_ids = set(updated_jobs.keys()) - set(known_jobs.keys())
@@ -119,5 +127,10 @@ def monitor_jobs(credentials, isLiveSite=False, isHeadless=False):
 
         # Announce all new jobs
         for job in new_job_ids:
+            if runloop_f is not None and runloop_f():
+                break
             announce.announceJob(known_jobs[job])
+
+    browser.quit()
+    logging.info('Ending monitoring loop')
 
