@@ -10,6 +10,7 @@ import sys
 
 # conditional imports
 if sys.platform.startswith('win32'):
+    import pythoncom
     import win32com.client
 
 def sayText(sentence):
@@ -20,6 +21,7 @@ def sayText(sentence):
         subprocess.run(cmd)
     elif sys.platform.startswith('win32'):
         # Works just fine after the correct libraries are installed
+        pythoncom.CoInitialize()
         speaker = win32com.client.Dispatch("SAPI.SpVoice")
         speaker.Speak(sentence)
 
