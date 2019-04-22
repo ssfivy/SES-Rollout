@@ -8,6 +8,8 @@
 
 import os
 import sys
+import threading
+import multiprocessing
 
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QFile
@@ -15,6 +17,21 @@ from PyQt5 import QtGui, uic
 
 import announce
 import monitor_ses_selenium
+import speech
+
+class StoppableThread(threading.Thread):
+    """Thread class with a stop() method. The thread itself has to check
+    regularly for the stopped() condition."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._stop_event = threading.Event()
+
+    def stop(self):
+        self._stop_event.set()
+
+    def stopped(self):
+        return self._stop_event.is_set()
 
 # Define function to import external files when using PyInstaller.
 def resource_path(relative_path):
@@ -30,18 +47,28 @@ def resource_path(relative_path):
 class SESRMainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         # Initialisation stuff
-        super(SESRMainWindow, self).__init__()
+        super().__init__()
         filepath = resource_path('qt/ses.ui')
         self.ui = uic.loadUi(filepath)
         self.ui.show()
 
-        # Set up all our application behavior
+        # Set up behavior - Start tab
+        self.monitor_thread = None
         self.ui.monitor_start.clicked.connect(self.monitor_start)
+        self.ui.monitor_stop.clicked.connect(self.monitor_stop)
+
+        # Set up behavior - Speaker tab
+        self.ui.speaker_test_say.clicked.connect(self.speaker_say)
+
+        # Set up behavior - Serial tab
+
+        # Set up behavior - About tab
 
 
     def monitor_start(self):
         print('Starting_program!')
 
+        # Grab all information needed to start
         credentials = {}
         credentials['login'] = self.ui.username.text() or ''
         credentials['pass']  = self.ui.password.text() or ''
@@ -57,9 +84,36 @@ class SESRMainWindow(QtWidgets.QMainWindow):
         if self.ui.rb_site_training.isChecked():
             livesite = False
 
-        announce.announceStartup(livesite)
-        # This works, but blocks the entire UI thread, so we need a separate worker thread
-        #monitor_ses_selenium.monitor_jobs(credentials, livesite, headless)
+        # Change user interface
+        self.ui.username.setDisabled(True)
+        self.ui.password.setDisabled(True)
+        self.ui.monitor_start.setDisabled(True)
+        self.ui.monitor_stop.setDisabled(False)
+
+        # Start monitoring
+        # Use separate thread so it does not block the main UI thread
+        def monitor_worker():
+            announce.announceStartup(livesite)
+            monitor_ses_selenium.monitor_jobs(credentials, livesite, headless)
+        self.monitor_thread = multiprocessing.Process(target=monitor_worker)
+        self.monitor_thread.start()
+
+    def monitor_stop(self):
+        print('Stopping monitor!')
+        # Change user interface
+        self.ui.username.setDisabled(False)
+        self.ui.password.setDisabled(False)
+        self.ui.monitor_start.setDisabled(False)
+        self.ui.monitor_stop.setDisabled(True)
+        # Set stop flag
+        self.monitor_thread.terminate()
+
+    def speaker_say(self):
+        # Use separate thread so it does not block the main UI thread
+        def speaker_worker():
+            speech.sayText(self.ui.speaker_test_string.text())
+        t = threading.Thread(target=speaker_worker)
+        t.start()
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)

@@ -27,42 +27,19 @@
        <attribute name="title">
         <string>Start</string>
        </attribute>
-       <layout class="QGridLayout" name="gridLayout" rowstretch="0,0,0,0,0" columnstretch="1,1">
-        <item row="1" column="0">
-         <widget class="QGroupBox" name="groupBox_2">
-          <property name="title">
-           <string>Site selector</string>
-          </property>
-          <layout class="QFormLayout" name="formLayout_2">
-           <item row="0" column="0">
-            <widget class="QRadioButton" name="rb_site_training">
-             <property name="text">
-              <string>Training Site</string>
-             </property>
-             <property name="checked">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QRadioButton" name="rb_site_live">
-             <property name="text">
-              <string>Live site</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
+       <layout class="QGridLayout" name="gridLayout" rowstretch="0,0,0,0" columnstretch="1,1">
         <item row="0" column="1" rowspan="4">
          <widget class="QGroupBox" name="groupBox_4">
           <property name="title">
            <string>Status</string>
           </property>
           <widget class="QPushButton" name="monitor_start">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
            <property name="geometry">
             <rect>
-             <x>80</x>
+             <x>10</x>
              <y>60</y>
              <width>171</width>
              <height>23</height>
@@ -72,42 +49,22 @@
             <string>Start monitoring</string>
            </property>
           </widget>
-         </widget>
-        </item>
-        <item row="0" column="0">
-         <widget class="QGroupBox" name="credentials">
-          <property name="title">
-           <string>Credentials</string>
-          </property>
-          <layout class="QFormLayout" name="formLayout">
-           <item row="0" column="0">
-            <widget class="QLabel" name="l_user">
-             <property name="text">
-              <string>Username</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QLineEdit" name="username"/>
-           </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="l_pass">
-             <property name="text">
-              <string>Password</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QLineEdit" name="password">
-             <property name="echoMode">
-              <enum>QLineEdit::Password</enum>
-             </property>
-             <property name="clearButtonEnabled">
-              <bool>false</bool>
-             </property>
-            </widget>
-           </item>
-          </layout>
+          <widget class="QPushButton" name="monitor_stop">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="geometry">
+            <rect>
+             <x>190</x>
+             <y>60</y>
+             <width>171</width>
+             <height>23</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Stop monitoring</string>
+           </property>
+          </widget>
          </widget>
         </item>
         <item row="2" column="0">
@@ -143,31 +100,71 @@
           </layout>
          </widget>
         </item>
-        <item row="4" column="1">
-         <spacer name="verticalSpacer_4">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
+        <item row="1" column="0">
+         <widget class="QGroupBox" name="groupBox_2">
+          <property name="title">
+           <string>Site selector</string>
           </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
+          <layout class="QFormLayout" name="formLayout_2">
+           <item row="0" column="0">
+            <widget class="QRadioButton" name="rb_site_training">
+             <property name="text">
+              <string>Training Site</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QRadioButton" name="rb_site_live">
+             <property name="text">
+              <string>Live site</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
         </item>
-        <item row="4" column="0">
-         <spacer name="verticalSpacer_2">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
+        <item row="0" column="0">
+         <widget class="QGroupBox" name="credentials">
+          <property name="title">
+           <string>Credentials</string>
           </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
+          <layout class="QFormLayout" name="formLayout">
+           <item row="0" column="0">
+            <widget class="QLabel" name="l_user">
+             <property name="text">
+              <string>Username</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLineEdit" name="username">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="l_pass">
+             <property name="text">
+              <string>Password</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QLineEdit" name="password">
+             <property name="echoMode">
+              <enum>QLineEdit::Password</enum>
+             </property>
+             <property name="clearButtonEnabled">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -190,7 +187,11 @@
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="speaker_test_string"/>
+            <widget class="QLineEdit" name="speaker_test_string">
+             <property name="text">
+              <string>Performing speaker test.</string>
+             </property>
+            </widget>
            </item>
            <item>
             <widget class="QPushButton" name="speaker_test_say">
