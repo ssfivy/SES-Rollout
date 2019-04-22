@@ -89,6 +89,9 @@ class SESRMainWindow(QtWidgets.QMainWindow):
         # Set up behavior - Serial tab
 
         # Set up behavior - About tab
+        filepath = resource_path('qt/about.txt')
+        with open(filepath, 'r', encoding='utf-8') as fb:
+            self.ui.aboutText.setPlainText(fb.read())
 
     def exit(self):
         '''Quit application gracefully'''

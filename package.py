@@ -18,6 +18,7 @@ cmd.append('--onefile')
 #cmd.append('--onedir')
 cmd.extend(['--name', name])
 cmd.extend(['--add-data', 'qt/ses.ui'+os.pathsep+'qt/'])
+cmd.extend(['--add-data', 'qt/about.txt'+os.pathsep+'qt/'])
 cmd.append(filepath)
 
 print(cmd)
