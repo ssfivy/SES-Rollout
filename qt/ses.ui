@@ -14,7 +14,7 @@
    <string>SES-Rollout</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout" stretch="3,1">
+   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1">
     <property name="sizeConstraint">
      <enum>QLayout::SetDefaultConstraint</enum>
     </property>
@@ -223,10 +223,10 @@
       </widget>
       <widget class="QWidget" name="tab_serial">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <attribute name="title">
-        <string>Serial</string>
+        <string>Serial (Beta)</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_3">
         <item row="1" column="0" colspan="2">
@@ -235,28 +235,25 @@
            <string>Serial port alert</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_4">
-           <item row="0" column="0" colspan="3">
-            <widget class="QCheckBox" name="checkBox">
-             <property name="text">
-              <string>Send the following message when new alert is received:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0" colspan="3">
-            <widget class="QLineEdit" name="lineEdit_3"/>
-           </item>
-           <item row="2" column="0">
+           <item row="4" column="0">
             <widget class="QLabel" name="label_2">
              <property name="text">
               <string>Is this message text or hex?</string>
              </property>
             </widget>
            </item>
-           <item row="2" column="1">
-            <widget class="QComboBox" name="comboBox_2">
+           <item row="1" column="0" colspan="3">
+            <widget class="QLineEdit" name="serial_msg">
+             <property name="text">
+              <string>TestSerial</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <widget class="QComboBox" name="serial_encoding">
              <item>
               <property name="text">
-               <string>Text</string>
+               <string>ASCII Text</string>
               </property>
              </item>
              <item>
@@ -266,10 +263,17 @@
              </item>
             </widget>
            </item>
-           <item row="2" column="2">
-            <widget class="QPushButton" name="pushButton_4">
+           <item row="4" column="2">
+            <widget class="QPushButton" name="serial_apply">
              <property name="text">
-              <string>TestSend</string>
+              <string>Save and Test Send</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_4">
+             <property name="text">
+              <string>Send the following message when new alert is received:</string>
              </property>
             </widget>
            </item>
@@ -283,7 +287,7 @@
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_2">
            <item>
-            <widget class="QPushButton" name="pushButton_5">
+            <widget class="QPushButton" name="serial_rescan">
              <property name="text">
               <string>Rescan serial ports</string>
              </property>
@@ -292,12 +296,45 @@
            <item alignment="Qt::AlignRight">
             <widget class="QLabel" name="label_3">
              <property name="text">
-              <string>Select serial port:</string>
+              <string>Serial port:</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QComboBox" name="comboBox"/>
+            <widget class="QComboBox" name="serial_ports"/>
+           </item>
+           <item alignment="Qt::AlignRight">
+            <widget class="QLabel" name="label">
+             <property name="text">
+              <string>Speed (bps):</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="serial_speed">
+             <item>
+              <property name="text">
+               <string>9600</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>38400</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>115200</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="serial_connect">
+             <property name="text">
+              <string>Connect</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>
@@ -316,22 +353,6 @@
          </spacer>
         </item>
        </layout>
-      </widget>
-      <widget class="QWidget" name="tab_ethernet">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <attribute name="title">
-        <string>Ethernet</string>
-       </attribute>
-      </widget>
-      <widget class="QWidget" name="tab_https">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <attribute name="title">
-        <string>HTTPS</string>
-       </attribute>
       </widget>
       <widget class="QWidget" name="tab_about">
        <attribute name="title">

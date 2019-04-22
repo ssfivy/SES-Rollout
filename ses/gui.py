@@ -17,8 +17,8 @@ from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 from PyQt5 import QtGui, uic
 
-import announce
 import monitor_ses_selenium
+import serialout
 import speech
 
 class StoppableThread(threading.Thread):
@@ -65,7 +65,7 @@ class ConsolePanelHandler(QtCore.QObject, logging.Handler):
 
 
 class SESRMainWindow(QtWidgets.QMainWindow):
-    def __init__(self):
+    def __init__(self, serial):
         # Initialisation stuff
         super().__init__()
         filepath = resource_path('qt/ses.ui')
@@ -92,6 +92,11 @@ class SESRMainWindow(QtWidgets.QMainWindow):
         self.ui.speaker_test_say.clicked.connect(self.speaker_say)
 
         # Set up behavior - Serial tab
+        self.serial = serial
+        self.ui.serial_rescan.clicked.connect(self.serial_rescan_ports)
+        self.serial_rescan_ports()
+        self.ui.serial_connect.clicked.connect(self.serial_connect)
+        self.ui.serial_apply.clicked.connect(self.serial_send)
 
         # Set up behavior - About tab
         filepath = resource_path('qt/about.txt')
@@ -140,7 +145,8 @@ class SESRMainWindow(QtWidgets.QMainWindow):
             try:
                 monitor_ses_selenium.monitor_jobs(credentials, livesite, headless, announceInitial,
                     wait_f=threading.current_thread().wait,
-                    runloop_f=threading.current_thread().stopped)
+                    runloop_f=threading.current_thread().stopped,
+                    serialout=self.serial)
             except:
                 logger.exception('Exception in monitor_worker thread')
             finally:
@@ -161,6 +167,26 @@ class SESRMainWindow(QtWidgets.QMainWindow):
         self.ui.jobs_announceInitial.setDisabled(False)
         # Set stop flag
         self.monitor_thread.stop()
+
+    def serial_connect(self):
+        self.serial.connect_port(
+                self.ui.serial_ports.currentText(),
+                self.ui.serial_speed.currentText()
+                )
+
+    def serial_rescan_ports(self):
+        self.serial.list_ports()
+        self.ui.serial_ports.clear()
+        print(self.serial.all_ports)
+        self.ui.serial_ports.insertItems(0, self.serial.all_ports)
+
+    def serial_send(self):
+        self.serial.message = self.ui.serial_msg.text()
+        if self.ui.serial_encoding.currentIndex() == 0:
+            self.serial.isText = True
+        elif self.ui.serial_encoding.currentIndex() == 1:
+            self.serial.isText = False
+        self.serial.announce()
 
     def speaker_say(self):
         # Use separate thread so it does not block the main UI thread
@@ -190,11 +216,15 @@ if __name__ == "__main__":
     rfh.setFormatter(formatter)
     logger.addHandler(rfh)
 
-    logger.info('Logging initialised!')
+    # Set up alert backends
+    s = serialout.SerialOut()
+    # e = ethernetout.EthernetOut()
+    # h = httpout.HttpOut()
+    # t = telephoneout.TelephoneOut()
 
     # set up application
     app = QtWidgets.QApplication(sys.argv)
-    window = SESRMainWindow()
+    window = SESRMainWindow(s)
 
     # set up logging to application
     consolehandler = ConsolePanelHandler(window.ui.logview)
@@ -202,6 +232,8 @@ if __name__ == "__main__":
     consolehandler.setFormatter(formatter)
     logger.addHandler(consolehandler)
     consolehandler.new_record.connect(window.ui.logview.appendPlainText) # <---- connect QPlainTextEdit.appendPlainText slot
+
+    logger.info('Logging initialised!')
 
     try:
         ret = app.exec_()

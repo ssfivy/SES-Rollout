@@ -54,7 +54,7 @@ def parse_jobs_table(browser, wait_f=time.sleep):
 
     return jobs
 
-def monitor_jobs(credentials, isLiveSite=False, isHeadless=False, announceInitialJobs=False, wait_f=time.sleep, runloop_f=None):
+def monitor_jobs(credentials, isLiveSite=False, isHeadless=False, announceInitialJobs=False, wait_f=time.sleep, runloop_f=None, serialout=None):
     '''Connect to web interface and parse jobs manually using Selenium'''
     # wait_f = function to call to wait x number of seconds, defaults to time.sleep. Need to replace this when we run as multithreaded so we can be killed quickly
     # runloop_f = function that returns false when we want to end the thread.
@@ -129,7 +129,7 @@ def monitor_jobs(credentials, isLiveSite=False, isHeadless=False, announceInitia
         for job in new_job_ids:
             if runloop_f is not None and runloop_f():
                 break
-            announce.announceJob(known_jobs[job])
+            announce.announceJob(known_jobs[job], serialout)
 
     browser.quit()
     logging.info('Ending monitoring loop')
