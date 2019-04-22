@@ -338,7 +338,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QPlainTextEdit" name="plainTextEdit">
+     <widget class="QPlainTextEdit" name="logview">
       <property name="readOnly">
        <bool>true</bool>
       </property>

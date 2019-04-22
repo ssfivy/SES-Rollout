@@ -5,6 +5,7 @@
 # https://stackoverflow.com/questions/2398800/linking-a-qtdesigner-ui-file-to-python-pyqt
 # https://stackoverflow.com/questions/14892713/how-do-you-load-ui-files-onto-python-classes-with-pyside/14894550#14894550
 # https://stackoverflow.com/questions/37888581/pyinstaller-ui-files-filenotfounderror-errno-2-no-such-file-or-directory
+# https://stackoverflow.com/questions/28655198/best-way-to-display-logs-in-pyqt
 
 import logging
 import os
@@ -13,7 +14,7 @@ import threading
 import multiprocessing
 
 from PyQt5 import QtWidgets
-from PyQt5.QtCore import QFile
+from PyQt5 import QtCore
 from PyQt5 import QtGui, uic
 
 import announce
@@ -45,6 +46,21 @@ def resource_path(relative_path):
 
     return os.path.join(base_path, relative_path)
 
+class ConsolePanelHandler(QtCore.QObject, logging.Handler):
+    # Only tested to inherit QPlainTextEdit
+    new_record = QtCore.pyqtSignal(object)
+
+    def __init__(self, parent):
+        super().__init__(parent)
+        super(logging.Handler).__init__()
+        self.parent = parent
+
+    def emit(self, record):
+        #self.parent.appendPlainText(self.format(record))
+        msg = self.format(record)
+        self.new_record.emit(msg) # <---- emit signal here
+
+
 class SESRMainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         # Initialisation stuff
@@ -52,6 +68,14 @@ class SESRMainWindow(QtWidgets.QMainWindow):
         filepath = resource_path('qt/ses.ui')
         self.ui = uic.loadUi(filepath)
         self.ui.show()
+
+        # Set up behavior - menu bar
+        self.ui.actionExit.triggered.connect(self.exit)
+
+        # Set up behavior - logging window
+        self.ui.logview.setLineWrapMode(QtWidgets.QPlainTextEdit.NoWrap)
+        self.ui.logview.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
+        self.ui.logview.setMaximumBlockCount(100)
 
         # Set up behavior - Start tab
         self.monitor_thread = None
@@ -65,6 +89,10 @@ class SESRMainWindow(QtWidgets.QMainWindow):
 
         # Set up behavior - About tab
 
+    def exit(self):
+        '''Quit application gracefully'''
+        # Todo: Stop all threads
+        QtWidgets.QApplication.quit()
 
     def monitor_start(self):
         logging.info('Starting monitor!')
@@ -112,8 +140,11 @@ class SESRMainWindow(QtWidgets.QMainWindow):
     def speaker_say(self):
         # Use separate thread so it does not block the main UI thread
         def speaker_worker():
+            self.ui.speaker_test_say.setDisabled(True)
+            logger.info('Playing speaker test message')
             sentence = self.ui.speaker_test_string.text()
             speech.sayText(sentence)
+            self.ui.speaker_test_say.setDisabled(False)
         t = threading.Thread(target=speaker_worker)
         t.start()
 
@@ -133,5 +164,12 @@ if __name__ == "__main__":
     # set up application
     app = QtWidgets.QApplication(sys.argv)
     window = SESRMainWindow()
+
+    # set up logging to application
+    consolehandler = ConsolePanelHandler(window.ui.logview)
+    consolehandler.setLevel(logging.INFO)
+    consolehandler.setFormatter(formatter)
+    logger.addHandler(consolehandler)
+    consolehandler.new_record.connect(window.ui.logview.appendPlainText) # <---- connect QPlainTextEdit.appendPlainText slot
 
     sys.exit(app.exec_())
