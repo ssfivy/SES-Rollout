@@ -122,6 +122,9 @@ class SESRMainWindow(QtWidgets.QMainWindow):
         self.ui.password.setDisabled(True)
         self.ui.monitor_start.setDisabled(True)
         self.ui.monitor_stop.setDisabled(False)
+        self.ui.rb_site_live.setDisabled(True)
+        self.ui.rb_site_training.setDisabled(True)
+        self.ui.browser_headless.setDisabled(True)
 
         # Start monitoring
         # Use separate thread so it does not block the main UI thread
@@ -138,6 +141,9 @@ class SESRMainWindow(QtWidgets.QMainWindow):
         self.ui.password.setDisabled(False)
         self.ui.monitor_start.setDisabled(False)
         self.ui.monitor_stop.setDisabled(True)
+        self.ui.rb_site_live.setDisabled(False)
+        self.ui.rb_site_training.setDisabled(False)
+        self.ui.browser_headless.setDisabled(False)
         # Set stop flag
         self.monitor_thread.terminate()
 
@@ -182,4 +188,9 @@ if __name__ == "__main__":
     logger.addHandler(consolehandler)
     consolehandler.new_record.connect(window.ui.logview.appendPlainText) # <---- connect QPlainTextEdit.appendPlainText slot
 
-    sys.exit(app.exec_())
+    try:
+        ret = app.exec_()
+    except:
+        logging.exception()
+    finally:
+        sys.exit(ret)
