@@ -9,8 +9,8 @@
 *__pycache__*
 *.pyc
 
-# Geckodriver log
-geckodriver.log
+# logs
+*.log
 
 # pyinstaller artifacts
 build/*

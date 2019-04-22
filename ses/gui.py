@@ -8,6 +8,7 @@
 # https://stackoverflow.com/questions/28655198/best-way-to-display-logs-in-pyqt
 
 import logging
+from   logging.handlers import RotatingFileHandler
 import os
 import sys
 import threading
@@ -158,6 +159,12 @@ if __name__ == "__main__":
     ch.setLevel(logging.INFO)
     ch.setFormatter(formatter)
     logger.addHandler(ch)
+
+    logfilename = 'SESRollout.log'
+    rfh = RotatingFileHandler(logfilename, maxBytes=1*1024*1024, backupCount=10, encoding='utf-8', delay=True)
+    rfh.setLevel(logging.DEBUG)
+    rfh.setFormatter(formatter)
+    logger.addHandler(rfh)
 
     logger.info('Logging initialised!')
 
